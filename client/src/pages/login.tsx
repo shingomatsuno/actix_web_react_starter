@@ -7,7 +7,7 @@ import { LoginParam } from "../types";
 
 export const Login = () => {
   const dispatch = useDispatch();
-  const [form, setForm] = useState<LoginParam>({ login_id: "", password: "" });
+  const [form, setForm] = useState<LoginParam>({ email: "", password: "" });
   const handleChange = (key: string) => (e: any) => {
     setForm({ ...form, [key]: e.target.value });
   };
@@ -36,8 +36,8 @@ export const Login = () => {
           <input
             type="text"
             name="email"
-            value={form.login_id}
-            onChange={handleChange("login_id")}
+            value={form.email}
+            onChange={handleChange("email")}
           ></input>
         </div>
         <div>

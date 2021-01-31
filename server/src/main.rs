@@ -18,7 +18,7 @@ async fn main() -> std::io::Result<()> {
         // `move` to take the ownership of `private_key`
         let cors = Cors::default()
             .allowed_origin(ALLOWED_ORIGIN)
-            .allowed_methods(vec!["GET", "POST", "DELETE"])
+            .allowed_methods(vec!["GET", "POST", "DELETE", "PUT"])
             .allowed_headers(vec![header::AUTHORIZATION, header::ACCEPT])
             .allowed_header(header::CONTENT_TYPE)
             .max_age(3600)

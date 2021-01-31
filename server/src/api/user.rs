@@ -1,10 +1,10 @@
 use actix_identity::Identity;
-use actix_web::{web, HttpResponse};
+use actix_web::{web, HttpResponse, Result};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Entry {
-    login_id: String,
+    email: String,
     password: String,
 }
 
@@ -21,12 +21,12 @@ curl -i --request POST \
   --data '{"login_id": "sarah", "password": "123"}'
  */
 pub async fn login(id: Identity, entry: web::Json<Entry>) -> web::Json<User> {
-    let login_id = entry.login_id.clone();
+    let email = entry.email.clone();
     println!("[user] ++++ login()");
-    println!("[user] login_id: {}", login_id);
-    id.remember(login_id.to_owned());
+    println!("[user] login_id: {}", email);
+    id.remember(email.to_owned());
     web::Json(User {
-        id: login_id,
+        id: email,
         name: "perfect".into(),
     })
 }

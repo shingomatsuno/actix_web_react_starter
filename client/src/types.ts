@@ -2,7 +2,7 @@ import { Interface } from "readline";
 
 // xxxParam リクエストパラメータ
 export type LoginParam = {
-  login_id: string;
+  email: string;
   password: string;
 };
 
