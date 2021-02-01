@@ -3,33 +3,60 @@ use actix_http::cookie::SameSite;
 use actix_identity::{CookieIdentityPolicy, IdentityService};
 use actix_web::http::header;
 use actix_web::{middleware, web, App, HttpResponse, HttpServer};
+use diesel::prelude::*;
+use diesel::r2d2::{self, ConnectionManager};
 use rand::Rng;
+use time::Duration;
+
 mod api;
 mod lib;
-
-const COOKIE_NAME: &str = "nacho";
-const ALLOWED_ORIGIN: &str = "http://localhost:3000";
 
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
     let private_key = rand::thread_rng().gen::<[u8; 32]>();
 
+    dotenv::dotenv().ok();
+    std::env::set_var(
+        "RUST_LOG",
+        "simple-auth-server=debug,actix_web=info,actix_server=info",
+    );
+    env_logger::init();
+
+    // let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+    // create db connection pool
+    // let manager = ConnectionManager::<PgConnection>::new(database_url);
+    // let pool: models::Pool = r2d2::Pool::builder()
+    //     .build(manager)
+    //     .expect("Failed to create pool.");
+    let domain: String = std::env::var("DOMAIN").unwrap_or_else(|_| "localhost".to_string());
+
+    let cookie_name: String = std::env::var("COOKIE_NAME").unwrap_or_else(|_| "AUTH".to_string());
+    let allowd_origin: String =
+        std::env::var("ALLOWED_ORIGIN").unwrap_or_else(|_| "http://localhost:3000".to_string());
+    let max_age: i64 = std::env::var("COOKIE_MAX_AGE")
+        .unwrap_or_else(|_| 60.to_string())
+        .parse()
+        .unwrap();
+
     HttpServer::new(move || {
         // `move` to take the ownership of `private_key`
-        let cors = Cors::default()
-            .allowed_origin(ALLOWED_ORIGIN)
-            .allowed_methods(vec!["GET", "POST", "DELETE", "PUT"])
-            .allowed_headers(vec![header::AUTHORIZATION, header::ACCEPT])
-            .allowed_header(header::CONTENT_TYPE)
-            .max_age(3600)
-            .supports_credentials(); // Allow the cookie auth.
         App::new()
             .wrap(middleware::Logger::default())
-            .wrap(cors)
+            .wrap(
+                Cors::default()
+                    .allowed_origin(allowd_origin.as_str())
+                    .allowed_methods(vec!["GET", "POST", "DELETE", "PUT", "PATCH"])
+                    .allowed_headers(vec![header::AUTHORIZATION, header::ACCEPT])
+                    .allowed_header(header::CONTENT_TYPE)
+                    .max_age(864000)
+                    .supports_credentials(),
+            )
             .wrap(IdentityService::new(
                 CookieIdentityPolicy::new(&private_key)
-                    .name(COOKIE_NAME)
+                    .name(&cookie_name)
                     .path("/")
+                    .domain(domain.as_str())
+                    .max_age_time(Duration::days(max_age))
                     .same_site(SameSite::Lax) // `Lax` by default, but to be explicit. POST isn't allowed for cross-site, though.
                     .secure(false),
             ))
