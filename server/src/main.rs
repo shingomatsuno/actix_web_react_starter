@@ -1,15 +1,22 @@
+#[macro_use]
+extern crate diesel;
+
 use actix_cors::Cors;
 use actix_http::cookie::SameSite;
 use actix_identity::{CookieIdentityPolicy, IdentityService};
 use actix_web::http::header;
 use actix_web::{middleware, web, App, HttpResponse, HttpServer};
-use diesel::prelude::*;
+use diesel::mysql::MysqlConnection;
 use diesel::r2d2::{self, ConnectionManager};
 use rand::Rng;
 use time::Duration;
 
+// プロジェクトで使うモジュールを宣言
 mod api;
-mod lib;
+mod errors;
+mod model;
+mod schema;
+mod util;
 
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
@@ -22,12 +29,12 @@ async fn main() -> std::io::Result<()> {
     );
     env_logger::init();
 
-    // let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+    let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
     // create db connection pool
-    // let manager = ConnectionManager::<PgConnection>::new(database_url);
-    // let pool: models::Pool = r2d2::Pool::builder()
-    //     .build(manager)
-    //     .expect("Failed to create pool.");
+    let manager = ConnectionManager::<MysqlConnection>::new(database_url);
+    let pool: model::Pool = r2d2::Pool::builder()
+        .build(manager)
+        .expect("Failed to create pool.");
     let domain: String = std::env::var("DOMAIN").unwrap_or_else(|_| "localhost".to_string());
 
     let cookie_name: String = std::env::var("COOKIE_NAME").unwrap_or_else(|_| "AUTH".to_string());
@@ -41,6 +48,7 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         // `move` to take the ownership of `private_key`
         App::new()
+            .data(pool.clone())
             .wrap(middleware::Logger::default())
             .wrap(
                 Cors::default()
@@ -64,13 +72,8 @@ async fn main() -> std::io::Result<()> {
                 web::scope("/api")
                     .service(
                         web::resource("/auth")
-                            .route(web::post().to(api::user::login))
-                            .route(web::delete().to(api::user::logout)),
-                    )
-                    .service(
-                        web::scope("/article").service(
-                            web::resource("/all").route(web::get().to(api::article::get_all)),
-                        ),
+                            .route(web::post().to(api::auth::login))
+                            .route(web::delete().to(api::auth::logout)),
                     )
                     .route("/", web::get().to(|| HttpResponse::Ok().body("api"))),
             )
