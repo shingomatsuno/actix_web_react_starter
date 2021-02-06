@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import * as auth from "../api/auth";
 import { useDispatch } from "react-redux";
 import { setUser } from "../store/modules/userModule";
-import { LoginParam } from "../types";
+import { LoginParam } from "../types/userType";
 
 export const Login = () => {
   const dispatch = useDispatch();

@@ -3,11 +3,13 @@ extern crate diesel;
 
 use actix_cors::Cors;
 use actix_http::cookie::SameSite;
-use actix_identity::{CookieIdentityPolicy, IdentityService};
+use actix_identity::{CookieIdentityPolicy, Identity, IdentityService};
 use actix_web::http::header;
 use actix_web::{middleware, web, App, HttpResponse, HttpServer};
-use diesel::mysql::MysqlConnection;
+use diesel::pg::PgConnection;
 use diesel::r2d2::{self, ConnectionManager};
+use errors::ServiceError;
+use model::user::UserInfo;
 use rand::Rng;
 use time::Duration;
 
@@ -31,7 +33,7 @@ async fn main() -> std::io::Result<()> {
 
     let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
     // create db connection pool
-    let manager = ConnectionManager::<MysqlConnection>::new(database_url);
+    let manager = ConnectionManager::<PgConnection>::new(database_url);
     let pool: model::Pool = r2d2::Pool::builder()
         .build(manager)
         .expect("Failed to create pool.");
@@ -82,4 +84,16 @@ async fn main() -> std::io::Result<()> {
     .bind("127.0.0.1:5000")?
     .run()
     .await
+}
+
+// ログインユーザを返す
+pub fn logged_user(id: Identity) -> Result<UserInfo, ServiceError> {
+    let user_string = id.identity();
+    match user_string {
+        Some(user_string) => {
+            let user = serde_json::from_str::<UserInfo>(&user_string).unwrap();
+            Ok(user)
+        }
+        None => Err(ServiceError::Unauthorized),
+    }
 }

@@ -1,16 +1,16 @@
 import { apiClient } from "./apiClient";
-import { User, LoginParam } from "../types";
+import { User, LoginParam } from "../types/userType";
 
 const PATH = "/auth";
 
 // ログインユーザを取得
-export async function get(): Promise<User | null> {
+export async function get(): Promise<User> {
   const res = await apiClient.get<User>(PATH);
   return res.data;
 }
 
 // ログイン
-export async function login(param: LoginParam): Promise<User | null> {
+export async function login(param: LoginParam): Promise<User> {
   const res = await apiClient.post<User>(PATH, param);
   return res.data;
 }

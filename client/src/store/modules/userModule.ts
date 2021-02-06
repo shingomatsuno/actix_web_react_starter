@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { User } from "../../types";
+import { User } from "../../types/userType";
 
 // ログインユーザを保持する
 type State = {
