@@ -23,8 +23,8 @@ pub struct Entry {
 
 // ユーザ登録
 pub async fn regist(
-    id: Identity,
     entry_data: web::Json<Entry>,
+    id: Identity,
     pool: web::Data<Pool>,
 ) -> Result<HttpResponse, ServiceError> {
     let res = web::block(move || create_user(entry_data.into_inner(), pool)).await;

@@ -1,5 +1,6 @@
 #[macro_use]
 extern crate diesel;
+extern crate log;
 
 use actix_cors::Cors;
 use actix_http::cookie::SameSite;
@@ -23,13 +24,14 @@ mod util;
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
     let private_key = rand::thread_rng().gen::<[u8; 32]>();
-
     dotenv::dotenv().ok();
     std::env::set_var(
         "RUST_LOG",
         "simple-auth-server=debug,actix_web=info,actix_server=info",
     );
-    env_logger::init();
+    log4rs::init_file("log4rs.yml", Default::default()).unwrap();
+
+    log::info!("Hello, world!");
 
     let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
     // create db connection pool
@@ -72,8 +74,10 @@ async fn main() -> std::io::Result<()> {
             ))
             .service(
                 web::scope("/api")
+                    .service(web::resource("/users").route(web::post().to(api::users::regist)))
                     .service(
                         web::resource("/auth")
+                            .route(web::get().to(api::auth::logged_user))
                             .route(web::post().to(api::auth::login))
                             .route(web::delete().to(api::auth::logout)),
                     )

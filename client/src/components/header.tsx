@@ -12,6 +12,8 @@ export const Header = () => {
   const history = useHistory();
   const { user } = useSelector((state: RootState) => state.user);
 
+  console.log(user);
+
   const onClick = async () => {
     await auth.logout();
     dispatch(setUser(null));

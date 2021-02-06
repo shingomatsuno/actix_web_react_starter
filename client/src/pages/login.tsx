@@ -42,8 +42,8 @@ export const Login = () => {
         </div>
         <div>
           <input
-            type="text"
-            name="email"
+            type="password"
+            name="password"
             value={form.password}
             onChange={handleChange("password")}
           ></input>

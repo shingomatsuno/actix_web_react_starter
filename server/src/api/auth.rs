@@ -18,8 +18,8 @@ pub struct AuthData {
 
 // ログイン
 pub async fn login(
-    id: Identity,
     auth_data: web::Json<AuthData>,
+    id: Identity,
     pool: web::Data<Pool>,
 ) -> Result<HttpResponse, ServiceError> {
     let res = web::block(move || check_loign(auth_data.into_inner(), pool)).await;

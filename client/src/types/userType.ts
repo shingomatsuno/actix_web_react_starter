@@ -8,10 +8,10 @@ export type LoginParam = {
 
 // ユーザー登録
 export type RegistParam = {
-  name: String;
-  email: String;
-  password: String;
-  password_confirmation: String;
+  name: string;
+  email: string;
+  password: string;
+  password_confirmation: string;
 };
 
 // ユーザ-情報

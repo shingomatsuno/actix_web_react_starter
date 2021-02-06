@@ -2059,6 +2059,7 @@ dependencies = [
  "env_logger",
  "futures",
  "lazy_static",
+ "log",
  "log4rs",
  "r2d2",
  "rand 0.8.3",
