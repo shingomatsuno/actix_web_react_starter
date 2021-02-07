@@ -24,26 +24,27 @@ mod util;
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
     let private_key = rand::thread_rng().gen::<[u8; 32]>();
+    // .envを使えるようにする
     dotenv::dotenv().ok();
-    std::env::set_var(
-        "RUST_LOG",
-        "simple-auth-server=debug,actix_web=info,actix_server=info",
-    );
+
+    // ログファイルの設定を読み込み
     log4rs::init_file("log4rs.yml", Default::default()).unwrap();
 
-    log::info!("Hello, world!");
-
+    // DBのコネクションプールを生成
     let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
     // create db connection pool
     let manager = ConnectionManager::<PgConnection>::new(database_url);
     let pool: model::Pool = r2d2::Pool::builder()
         .build(manager)
         .expect("Failed to create pool.");
+
+    // 許可するorigin
+    let allowd_origin: String =
+        std::env::var("ALLOWED_ORIGIN").unwrap_or_else(|_| "http://localhost:3000".to_string());
+
     let domain: String = std::env::var("DOMAIN").unwrap_or_else(|_| "localhost".to_string());
 
     let cookie_name: String = std::env::var("COOKIE_NAME").unwrap_or_else(|_| "AUTH".to_string());
-    let allowd_origin: String =
-        std::env::var("ALLOWED_ORIGIN").unwrap_or_else(|_| "http://localhost:3000".to_string());
     let max_age: i64 = std::env::var("COOKIE_MAX_AGE")
         .unwrap_or_else(|_| 60.to_string())
         .parse()

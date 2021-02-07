@@ -1,6 +1,7 @@
 use actix_identity::Identity;
 use actix_web::{error::BlockingError, web, HttpResponse};
 
+use crate::log;
 use crate::model::user::User;
 use crate::model::Pool;
 use crate::util;
@@ -8,7 +9,6 @@ use crate::{errors::ServiceError, model::user::UserInfo};
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
-
 // ログインチェック用パラメータ
 #[derive(Debug, Serialize, Deserialize)]
 pub struct AuthData {
@@ -25,11 +25,13 @@ pub async fn login(
     let res = web::block(move || check_loign(auth_data.into_inner(), pool)).await;
     match res {
         Ok(user) => {
+            // ログイン成功
             let user_string = serde_json::to_string(&user).unwrap();
             id.remember(user_string);
             Ok(HttpResponse::Ok().json(user))
         }
         Err(err) => match err {
+            // ログイン失敗
             BlockingError::Error(service_error) => Err(service_error),
             BlockingError::Canceled => Err(ServiceError::InternalServerError),
         },

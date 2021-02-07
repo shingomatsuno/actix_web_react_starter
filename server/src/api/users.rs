@@ -51,6 +51,7 @@ fn create_user(entry_data: Entry, pool: web::Data<Pool>) -> Result<UserInfo, Ser
         password: util::hash_password(&entry_data.password.clone()).expect("password hash error"),
     };
     let conn: &PgConnection = &pool.get().unwrap();
+    // DBに登録
     let user = diesel::insert_into(schema::users::table)
         .values(new_user)
         .get_result::<User>(conn)

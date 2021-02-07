@@ -2,7 +2,11 @@ import { Link } from "react-router-dom";
 import { useState } from "react";
 import { RegistParam } from "../types/userType";
 import * as api from "../api/users";
+import { useDispatch } from "react-redux";
+import { setUser } from "../store/modules/userModule";
+
 export const Top = () => {
+  const dispatch = useDispatch();
   const [form, setForm] = useState<RegistParam>({
     name: "",
     email: "",
@@ -16,10 +20,12 @@ export const Top = () => {
 
   const handleClick = async (e: any) => {
     e.preventDefault();
-    const res = await api.regist(form).catch((e) => {
-      console.log(e);
+    const user = await api.regist(form).catch((e) => {
+      return null;
     });
-    console.log(res);
+    if (user) {
+      dispatch(setUser(user));
+    }
   };
   return (
     <div id="top">
