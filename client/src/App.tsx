@@ -1,15 +1,21 @@
-import React, { Component, useEffect, useState } from "react";
-import { Route, Redirect } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Route, Redirect, useLocation } from "react-router-dom";
+import CssBaseline from "@material-ui/core/CssBaseline";
+import { createStyles, Theme, makeStyles } from "@material-ui/core/styles";
 import "./App.css";
-import { Header } from "./components/header";
-import { Top } from "./pages/top";
-import { Articles } from "./pages/articles";
-import { Login } from "./pages/login";
+import Header from "./components/organisms/header";
+import Drwr from "./components/organisms/drwr";
+import Top from "./pages/top";
+import Signup from "./pages/signup";
+import Articles from "./pages/articles";
+import Home from "./pages/home";
+import Login from "./pages/login";
 import * as auth from "./api/auth";
-import { useSelector } from "react-redux";
 import { RootState } from "./store/rootReducer";
 import { useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 import { setUser } from "./store/modules/userModule";
+import { setLoading } from "./store/modules/loadingModule";
 
 // 認証が必要なroute
 const ProtectedRoute = ({ component, ...props }: any) => {
@@ -34,33 +40,87 @@ const ProtectedRoute = ({ component, ...props }: any) => {
   );
 };
 
-export const App = () => {
+// 認証中は遷移できないroute
+const UnauthRoute = ({ component, ...props }: any) => {
+  const { user } = useSelector((state: RootState) => state.user);
+
+  return (
+    <Route
+      {...props}
+      component={
+        !user
+          ? component
+          : ({ location }: any) => (
+              <Redirect
+                to={{
+                  pathname: "/home",
+                  state: { from: location },
+                }}
+              />
+            )
+      }
+    />
+  );
+};
+const useStyles = makeStyles((theme: Theme) =>
+  createStyles({
+    root: {
+      flexGrow: 1,
+      display: "flex",
+    },
+    content: {
+      flexGrow: 1,
+      padding: theme.spacing(3),
+      marginTop: "65px",
+    },
+  })
+);
+
+export default function App() {
+  const classes = useStyles();
+  // パスを取得
+  const location = useLocation();
+  const path = location.pathname;
+  // ログイン情報
+  const { user } = useSelector((state: RootState) => state.user);
+  // 初期化フラグ
+  const [init, setInit] = useState<boolean>(false);
   const dispatch = useDispatch();
-  const [loading, setLoading] = useState<boolean>(true);
+
+  const initialize = async () => {
+    dispatch(setLoading(true));
+    await checkLogin();
+    dispatch(setLoading(false));
+    setInit(true);
+  };
+
+  // ログインチェック
+  const checkLogin = async () => {
+    const user = await auth.get().catch((e) => {
+      return null;
+    });
+    dispatch(setUser(user));
+  };
 
   useEffect(() => {
     // 認証チェック
-    const checkLogin = async () => {
-      const user = await auth.get().catch((e) => {
-        return null;
-      });
-      dispatch(setUser(user));
-      setLoading(false);
-    };
-    checkLogin();
+    initialize();
   }, []);
 
-  if (loading) {
-    return <div>...Loading</div>;
-  }
   return (
-    <div>
+    <div className={classes.root}>
+      <CssBaseline />
       <Header />
-      <div id="container">
-        <Route exact path="/" component={Top} />
-        <ProtectedRoute path="/articles" component={Articles} />
-        <Route path="/login" component={Login} />
-      </div>
+      {user && path !== "/" && <Drwr />}
+      {init && (
+        <main className={classes.content}>
+          <Route exact path="/" component={Top} />
+          <UnauthRoute path="/login" component={Login} />
+          <UnauthRoute exact path="/signup" component={Signup} />
+          <ProtectedRoute path="/articles" component={Articles} />
+          <ProtectedRoute path="/home" component={Home} />
+        </main>
+      )}
     </div>
   );
-};
+}

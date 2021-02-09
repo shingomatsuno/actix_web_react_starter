@@ -7,7 +7,7 @@ appenders:
   log_file:
     kind: rolling_file
     append: true
-    path: "log/app-log.log"
+    path: "logs/app-log.log"
     encoder:
       pattern: "{h({d(%m-%d-%Y %H:%M:%S)})} - {m}{n}"
     policy:
