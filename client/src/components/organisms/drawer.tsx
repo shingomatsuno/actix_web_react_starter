@@ -1,6 +1,6 @@
 import { makeStyles } from "@material-ui/core/styles";
 import Toolbar from "@material-ui/core/Toolbar";
-import Drawer from "@material-ui/core/Drawer";
+import MUDrawer from "@material-ui/core/Drawer";
 import List from "@material-ui/core/List";
 import Divider from "@material-ui/core/Divider";
 import ListItem from "@material-ui/core/ListItem";
@@ -28,10 +28,10 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function Drwr() {
+export default function Drawer() {
   const classes = useStyles();
   return (
-    <Drawer
+    <MUDrawer
       className={classes.drawer}
       variant="permanent"
       classes={{
@@ -62,6 +62,6 @@ export default function Drwr() {
           ))}
         </List>
       </div>
-    </Drawer>
+    </MUDrawer>
   );
 }

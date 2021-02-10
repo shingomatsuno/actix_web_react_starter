@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import Grid from "@material-ui/core/Grid";
 import Container from "@material-ui/core/Container";
 import TextField from "@material-ui/core/TextField";
@@ -6,13 +6,18 @@ import * as auth from "../api/auth";
 import { useDispatch } from "react-redux";
 import { setUser } from "../store/modules/userModule";
 import { LoginParam } from "../types/userType";
-import Btn from "../components/atoms/btn";
+import Button from "../components/atoms/button";
 import { RootState } from "../store/rootReducer";
 import { useHistory } from "react-router-dom";
 import { setLoading } from "../store/modules/loadingModule";
 import { useSelector } from "react-redux";
+import { openAlert } from "../store/modules/alertModule";
 
 export default function Login() {
+  useEffect(() => {
+    document.title = "ログイン";
+  }, []);
+
   const history = useHistory();
   const { loading } = useSelector((state: RootState) => state.loading);
 
@@ -29,7 +34,9 @@ export default function Login() {
       .login({ ...form })
       .catch((e) => {
         //error
-        return null;
+        const message = e.response.data;
+        const severity = "error";
+        dispatch(openAlert({ message, severity }));
       })
       .finally(() => {
         dispatch(setLoading(false));
@@ -41,36 +48,34 @@ export default function Login() {
     }
   };
   return (
-    <React.Fragment>
-      <Container maxWidth="xs">
-        <Grid container spacing={3}>
-          <Grid item xs={12}>
-            <h1>Login</h1>
-          </Grid>
-          <Grid item xs={12}>
-            <TextField
-              fullWidth
-              name="email"
-              label="email"
-              value={form.email}
-              onChange={handleChange("email")}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <TextField
-              fullWidth
-              name="password"
-              type="password"
-              label="password"
-              value={form.password}
-              onChange={handleChange("password")}
-            />
-          </Grid>
-          <Grid item xs={4}>
-            <Btn title="SEND" loading={loading} onClick={handleClick} />
-          </Grid>
+    <Container maxWidth="xs">
+      <Grid container spacing={3}>
+        <Grid item xs={12}>
+          <h1>Login</h1>
         </Grid>
-      </Container>
-    </React.Fragment>
+        <Grid item xs={12}>
+          <TextField
+            fullWidth
+            name="email"
+            label="email"
+            value={form.email}
+            onChange={handleChange("email")}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <TextField
+            fullWidth
+            name="password"
+            type="password"
+            label="password"
+            value={form.password}
+            onChange={handleChange("password")}
+          />
+        </Grid>
+        <Grid item xs={4}>
+          <Button title="SEND" loading={loading} onClick={handleClick} />
+        </Grid>
+      </Grid>
+    </Container>
   );
 }

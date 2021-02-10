@@ -67,5 +67,7 @@ fn check_loign(auth_data: AuthData, pool: web::Data<Pool>) -> Result<UserInfo, S
             }
         }
     }
-    Err(ServiceError::Unauthorized)
+    Err(ServiceError::BadRequest(
+        "メールアドレスかパスワードが違います".into(),
+    ))
 }

@@ -1,11 +1,14 @@
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { RegistParam } from "../types/userType";
 import * as api from "../api/users";
 import { useDispatch } from "react-redux";
 import { setUser } from "../store/modules/userModule";
 
 export default function Signup() {
+  useEffect(() => {
+    document.title = "サインアップ";
+  }, []);
   const dispatch = useDispatch();
   const [form, setForm] = useState<RegistParam>({
     name: "",

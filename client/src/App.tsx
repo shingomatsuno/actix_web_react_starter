@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Route, Redirect, useLocation } from "react-router-dom";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import { createStyles, Theme, makeStyles } from "@material-ui/core/styles";
 import "./App.css";
 import Header from "./components/organisms/header";
-import Drwr from "./components/organisms/drwr";
+import Drawer from "./components/organisms/drawer";
 import Top from "./pages/top";
 import Signup from "./pages/signup";
 import Articles from "./pages/articles";
@@ -16,11 +16,12 @@ import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
 import { setUser } from "./store/modules/userModule";
 import { setLoading } from "./store/modules/loadingModule";
+import Alert from "./components/molecules/alert";
+import { closeAlert } from "./store/modules/alertModule";
 
 // 認証が必要なroute
 const ProtectedRoute = ({ component, ...props }: any) => {
   const { user } = useSelector((state: RootState) => state.user);
-
   return (
     <Route
       {...props}
@@ -43,7 +44,6 @@ const ProtectedRoute = ({ component, ...props }: any) => {
 // 認証中は遷移できないroute
 const UnauthRoute = ({ component, ...props }: any) => {
   const { user } = useSelector((state: RootState) => state.user);
-
   return (
     <Route
       {...props}
@@ -107,18 +107,30 @@ export default function App() {
     initialize();
   }, []);
 
+  useEffect(() => {
+    // ページに遷移したとき
+    return () => {
+      // ページから離れるとき
+      // アラートが開いていたら閉じる
+      dispatch(closeAlert());
+    };
+  });
+
   return (
     <div className={classes.root}>
       <CssBaseline />
       <Header />
-      {user && path !== "/" && <Drwr />}
+      {user && path !== "/" && <Drawer />}
       {init && (
         <main className={classes.content}>
-          <Route exact path="/" component={Top} />
-          <UnauthRoute path="/login" component={Login} />
-          <UnauthRoute exact path="/signup" component={Signup} />
-          <ProtectedRoute path="/articles" component={Articles} />
-          <ProtectedRoute path="/home" component={Home} />
+          <Alert />
+          <React.Fragment>
+            <Route exact path="/" component={Top} />
+            <UnauthRoute path="/login" component={Login} />
+            <UnauthRoute exact path="/signup" component={Signup} />
+            <ProtectedRoute path="/articles" component={Articles} />
+            <ProtectedRoute path="/home" component={Home} />
+          </React.Fragment>
         </main>
       )}
     </div>

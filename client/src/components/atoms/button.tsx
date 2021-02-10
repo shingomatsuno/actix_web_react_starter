@@ -2,7 +2,7 @@ import React from "react";
 import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import { green } from "@material-ui/core/colors";
-import Button from "@material-ui/core/Button";
+import MUButton from "@material-ui/core/Button";
 import { PropTypes } from "@material-ui/core";
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -37,7 +37,7 @@ type Props = {
 };
 
 // ローディング付きのボタン
-export default function Btn({
+export default function Button({
   title,
   onClick,
   loading,
@@ -59,7 +59,7 @@ export default function Btn({
 
   return (
     <div className={classes.wrapper}>
-      <Button
+      <MUButton
         fullWidth
         variant={variant}
         color={color}
@@ -67,7 +67,7 @@ export default function Btn({
         onClick={handleButtonClick}
       >
         {title}
-      </Button>
+      </MUButton>
       {loading && (
         <CircularProgress size={24} className={classes.buttonProgress} />
       )}
