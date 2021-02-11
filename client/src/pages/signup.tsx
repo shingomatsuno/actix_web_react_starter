@@ -26,6 +26,8 @@ export default function Signup() {
     password_confirmation: "",
   });
 
+  const [errors, setErrors] = useState<any>({});
+
   const handleChange = (key: string) => (e: any) => {
     setForm({ ...form, [key]: e.target.value });
   };
@@ -36,7 +38,7 @@ export default function Signup() {
     const user = await api
       .regist(form)
       .catch((e) => {
-        return null;
+        setErrors({ ...e.response.data });
       })
       .finally(() => {
         dispatch(setLoading(false));
@@ -65,6 +67,8 @@ export default function Signup() {
         <Grid item xs={12}>
           <TextField
             fullWidth
+            error={!!errors.email}
+            helperText={errors.email && errors.email[0].message}
             name="email"
             label="email"
             value={form.email}
@@ -74,6 +78,8 @@ export default function Signup() {
         <Grid item xs={12}>
           <TextField
             fullWidth
+            error={!!errors.password}
+            helperText={errors.password && errors.password[0].message}
             name="password"
             type="password"
             label="password"
@@ -87,7 +93,7 @@ export default function Signup() {
             name="password_confirmation"
             type="password"
             label="password confirmation"
-            value={form.password}
+            value={form.password_confirmation}
             onChange={handleChange("password_confirmation")}
           />
         </Grid>

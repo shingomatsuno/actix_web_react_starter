@@ -30,3 +30,4 @@ sparkpost = "0.5.2"
 uuid = { version = "0.8", features = ["serde", "v4"] }
 log4rs = "1.0.0"
 log = "0.4.8"
+validator = { version = "0.12", features = ["derive"] }
