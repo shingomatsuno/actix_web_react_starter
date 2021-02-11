@@ -14,12 +14,12 @@ const initialState: State = {
   severity: "info",
 };
 
-const alertModule = createSlice({
+const snackbarModule = createSlice({
   name: "alert",
   initialState,
   // action
   reducers: {
-    openAlert(
+    openSnack(
       state: State,
       action: PayloadAction<{
         message?: string;
@@ -32,12 +32,12 @@ const alertModule = createSlice({
       state.message = message || "";
       state.severity = severity || "info";
     },
-    closeAlert(state: State) {
+    closeSnack(state: State) {
       state.open = false;
     },
   },
 });
 
-export const { openAlert, closeAlert } = alertModule.actions;
+export const { openSnack, closeSnack } = snackbarModule.actions;
 
-export default alertModule;
+export default snackbarModule;

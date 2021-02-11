@@ -1,4 +1,3 @@
-import MuiAlert, { AlertProps } from "@material-ui/lab/Alert";
 import { createStyles, makeStyles } from "@material-ui/core/styles";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/rootReducer";
@@ -7,10 +6,7 @@ import { closeAlert } from "../../store/modules/alertModule";
 import IconButton from "@material-ui/core/IconButton";
 import Collapse from "@material-ui/core/Collapse";
 import CloseIcon from "@material-ui/icons/Close";
-
-function _Alert(props: AlertProps) {
-  return <MuiAlert elevation={6} variant="filled" {...props} />;
-}
+import Alrt from "../atoms/alert";
 
 const useStyles = makeStyles(() =>
   createStyles({
@@ -21,6 +17,7 @@ const useStyles = makeStyles(() =>
   })
 );
 
+// alertメッセージを表示
 export default function Alert() {
   const dispatch = useDispatch();
   const classes = useStyles();
@@ -35,7 +32,7 @@ export default function Alert() {
   return (
     <div className={classes.root}>
       <Collapse in={alert.open}>
-        <_Alert
+        <Alrt
           severity={alert.severity}
           action={
             <IconButton
@@ -49,7 +46,7 @@ export default function Alert() {
           }
         >
           {alert.message}
-        </_Alert>
+        </Alrt>
       </Collapse>
     </div>
   );

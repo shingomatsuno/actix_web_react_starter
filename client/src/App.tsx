@@ -18,6 +18,8 @@ import { setUser } from "./store/modules/userModule";
 import { setLoading } from "./store/modules/loadingModule";
 import Alert from "./components/molecules/alert";
 import { closeAlert } from "./store/modules/alertModule";
+import Snackbar from "./components/molecules/snackbar";
+import { closeSnack } from "./store/modules/snackbarModule";
 
 // 認証が必要なroute
 const ProtectedRoute = ({ component, ...props }: any) => {
@@ -88,6 +90,7 @@ export default function App() {
   const dispatch = useDispatch();
 
   const initialize = async () => {
+    // 初期処理
     dispatch(setLoading(true));
     await checkLogin();
     dispatch(setLoading(false));
@@ -109,16 +112,20 @@ export default function App() {
 
   useEffect(() => {
     // ページに遷移したとき
+
     return () => {
       // ページから離れるとき
       // アラートが開いていたら閉じる
       dispatch(closeAlert());
+      // スナックバーが開いていたら閉じる
+      dispatch(closeSnack());
     };
   });
 
   return (
     <div className={classes.root}>
       <CssBaseline />
+      <Snackbar />
       <Header />
       {user && path !== "/" && <Drawer />}
       {init && (
