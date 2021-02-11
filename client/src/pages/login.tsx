@@ -12,7 +12,6 @@ import { useHistory } from "react-router-dom";
 import { setLoading } from "../store/modules/loadingModule";
 import { useSelector } from "react-redux";
 import { openAlert } from "../store/modules/alertModule";
-
 export default function Login() {
   useEffect(() => {
     document.title = "ログイン";
