@@ -5,18 +5,17 @@ extern crate log;
 use actix_cors::Cors;
 use actix_http::cookie::SameSite;
 use actix_identity::{CookieIdentityPolicy, Identity, IdentityService};
+use actix_web::error;
 use actix_web::http::header;
 use actix_web::{middleware, web, App, HttpResponse, HttpServer};
 use diesel::pg::PgConnection;
 use diesel::r2d2::{self, ConnectionManager};
-use errors::ServiceError;
 use model::user::UserInfo;
 use rand::Rng;
 use time::Duration;
 
 // プロジェクトで使うモジュールを宣言
 mod api;
-mod errors;
 mod model;
 mod schema;
 mod util;
@@ -75,7 +74,11 @@ async fn main() -> std::io::Result<()> {
             ))
             .service(
                 web::scope("/api")
-                    .service(web::resource("/users").route(web::post().to(api::users::regist)))
+                    .service(
+                        web::resource("/users")
+                            .route(web::post().to(api::users::regist))
+                            .route(web::put().to(api::users::update)),
+                    )
                     .service(
                         web::resource("/auth")
                             .route(web::get().to(api::auth::logged_user))
@@ -92,13 +95,13 @@ async fn main() -> std::io::Result<()> {
 }
 
 // ログインユーザを返す
-pub fn logged_user(id: Identity) -> Result<UserInfo, ServiceError> {
+pub fn logged_user(id: &Identity) -> Result<UserInfo, error::Error> {
     let user_string = id.identity();
     match user_string {
         Some(user_string) => {
             let user = serde_json::from_str::<UserInfo>(&user_string).unwrap();
             Ok(user)
         }
-        None => Err(ServiceError::Unauthorized),
+        None => Err(error::ErrorUnauthorized("Unauthorized")),
     }
 }

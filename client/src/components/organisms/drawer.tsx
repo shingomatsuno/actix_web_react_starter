@@ -2,12 +2,9 @@ import { makeStyles } from "@material-ui/core/styles";
 import Toolbar from "@material-ui/core/Toolbar";
 import MUDrawer from "@material-ui/core/Drawer";
 import List from "@material-ui/core/List";
-import Divider from "@material-ui/core/Divider";
 import ListItem from "@material-ui/core/ListItem";
-import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
-import InboxIcon from "@material-ui/icons/MoveToInbox";
-import MailIcon from "@material-ui/icons/Mail";
+import { useLocation, useHistory } from "react-router-dom";
 
 const drawerWidth = 240;
 
@@ -28,8 +25,20 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+const menus = [
+  { text: "HOME", to: "/home" },
+  { text: "TODO", to: "/todo" },
+];
+
 export default function Drawer() {
   const classes = useStyles();
+  const location = useLocation();
+  const history = useHistory();
+  const handleClick = (key: number) => (e: any) => {
+    const to = menus[key].to;
+    history.push(to);
+  };
+
   return (
     <MUDrawer
       className={classes.drawer}
@@ -41,23 +50,14 @@ export default function Drawer() {
       <Toolbar />
       <div className={classes.drawerContainer}>
         <List>
-          {["Inbox", "Starred", "Send email", "Drafts"].map((text, index) => (
-            <ListItem button key={text}>
-              <ListItemIcon>
-                {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-              </ListItemIcon>
-              <ListItemText primary={text} />
-            </ListItem>
-          ))}
-        </List>
-        <Divider />
-        <List>
-          {["All mail", "Trash", "Spam"].map((text, index) => (
-            <ListItem button key={text}>
-              <ListItemIcon>
-                {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-              </ListItemIcon>
-              <ListItemText primary={text} />
+          {menus.map((menu, i) => (
+            <ListItem
+              button
+              key={i}
+              selected={location.pathname === menu.to}
+              onClick={handleClick(i)}
+            >
+              <ListItemText primary={menu.text} />
             </ListItem>
           ))}
         </List>

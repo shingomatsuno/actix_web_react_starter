@@ -14,6 +14,12 @@ export type RegistParam = {
   password_confirmation: string;
 };
 
+// ユーザ編集
+export type UpdateParam = {
+  name: string;
+  email: String;
+};
+
 // ユーザ-情報
 export type User = {
   id: number;

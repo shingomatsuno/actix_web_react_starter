@@ -1,11 +1,12 @@
 use actix_identity::Identity;
-use actix_web::{error::BlockingError, web, HttpResponse};
+use actix_web::error;
+use actix_web::{web, HttpResponse};
 
 use crate::log;
 use crate::model::user::User;
+use crate::model::user::UserInfo;
 use crate::model::Pool;
 use crate::util;
-use crate::{errors::ServiceError, model::user::UserInfo};
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -21,20 +22,14 @@ pub async fn login(
     auth_data: web::Json<AuthData>,
     id: Identity,
     pool: web::Data<Pool>,
-) -> Result<HttpResponse, ServiceError> {
-    let res = web::block(move || check_loign(auth_data.into_inner(), pool)).await;
-    match res {
+) -> Result<HttpResponse, error::Error> {
+    match check_loign(auth_data.into_inner(), pool) {
         Ok(user) => {
-            // ログイン成功
             let user_string = serde_json::to_string(&user).unwrap();
             id.remember(user_string);
             Ok(HttpResponse::Ok().json(user))
         }
-        Err(err) => match err {
-            // ログイン失敗
-            BlockingError::Error(service_error) => Err(service_error),
-            BlockingError::Canceled => Err(ServiceError::InternalServerError),
-        },
+        Err(error) => Err(error),
     }
 }
 
@@ -45,20 +40,21 @@ pub async fn logout(id: Identity) -> HttpResponse {
 }
 
 // ログインユーザを取得
-pub async fn logged_user(id: Identity) -> Result<HttpResponse, ServiceError> {
-    if let Ok(user) = crate::logged_user(id) {
+pub async fn logged_user(id: Identity) -> Result<HttpResponse, error::Error> {
+    if let Ok(user) = crate::logged_user(&id) {
         return Ok(HttpResponse::Ok().json(user));
     }
-    Err(ServiceError::Unauthorized)
+    Err(error::ErrorUnauthorized("Unauthorized"))
 }
 
 // ログインチェック
-fn check_loign(auth_data: AuthData, pool: web::Data<Pool>) -> Result<UserInfo, ServiceError> {
+fn check_loign(auth_data: AuthData, pool: web::Data<Pool>) -> Result<UserInfo, error::Error> {
     use crate::schema::users::dsl::{email, users};
     let conn: &PgConnection = &pool.get().unwrap();
     let mut items = users
-        .filter(email.eq(&auth_data.email))
-        .load::<User>(conn)?;
+        .filter(email.eq(&auth_data.email.to_ascii_lowercase()))
+        .load::<User>(conn)
+        .map_err(error::ErrorInternalServerError)?;
 
     if let Some(user) = items.pop() {
         if let Ok(matching) = util::verify(&user.password, &auth_data.password) {
@@ -67,7 +63,7 @@ fn check_loign(auth_data: AuthData, pool: web::Data<Pool>) -> Result<UserInfo, S
             }
         }
     }
-    Err(ServiceError::BadRequest(
-        "メールアドレスかパスワードが違います".into(),
+    Err(error::ErrorBadRequest(
+        "メールアドレスかパスワードが違います",
     ))
 }

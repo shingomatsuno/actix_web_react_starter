@@ -17,6 +17,7 @@ const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
     display: "flex",
+    justifyContent: "space-between",
   },
 
   menuButton: {
@@ -71,14 +72,21 @@ export default function Header() {
 
   return (
     <AppBar position="fixed" className={classes.appBar}>
-      <Toolbar>
-        <Link className={classes.link} to="/">
-          Top
-        </Link>
+      <Toolbar className={classes.root}>
+        <div>
+          <Link className={classes.link} to="/">
+            TOP
+          </Link>
+        </div>
         {user ? (
-          <Button color="inherit" onClick={logout}>
-            LOGOUT
-          </Button>
+          <div>
+            <Link className={classes.leftButton} to="/home">
+              MYPAGE
+            </Link>
+            <Button color="inherit" onClick={logout}>
+              LOGOUT
+            </Button>
+          </div>
         ) : (
           <div>
             <Link className={classes.leftButton} to="/signup">

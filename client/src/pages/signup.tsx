@@ -58,6 +58,8 @@ export default function Signup() {
         <Grid item xs={12}>
           <TextField
             fullWidth
+            error={!!errors.name}
+            helperText={errors.name && errors.name[0].message}
             name="name"
             label="name"
             value={form.name}
@@ -90,6 +92,11 @@ export default function Signup() {
         <Grid item xs={12}>
           <TextField
             fullWidth
+            error={!!errors.password_confirmation}
+            helperText={
+              errors.password_confirmation &&
+              errors.password_confirmation[0].message
+            }
             name="password_confirmation"
             type="password"
             label="password confirmation"
