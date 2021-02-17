@@ -27,7 +27,7 @@ const useStyles = makeStyles((theme) => ({
 
 const menus = [
   { text: "HOME", to: "/home" },
-  { text: "TODO", to: "/todo" },
+  { text: "POST", to: "/posts" },
 ];
 
 export default function Drawer() {

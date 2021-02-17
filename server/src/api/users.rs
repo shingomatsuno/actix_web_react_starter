@@ -43,7 +43,7 @@ pub async fn regist(
     signup_data: web::Json<SignupData>,
     id: Identity,
     pool: web::Data<Pool>,
-) -> Result<HttpResponse, Error> {
+) -> Result<HttpResponse, error::Error> {
     // バリデーション
     if let Err(e) = signup_data.validate() {
         let errors = serde_json::json!(&e);
@@ -80,18 +80,19 @@ pub async fn regist(
 
 // ユーザ更新
 pub async fn update(
-    id: Identity,
     update_data: web::Json<UpdateData>,
+    id: Identity,
     pool: web::Data<Pool>,
-) -> Result<HttpResponse, Error> {
+) -> Result<HttpResponse, error::Error> {
+    // ログインチェック
+    let user = crate::logged_user(&id).map_err(error::ErrorUnauthorized)?;
+
     if let Err(err) = update_data.validate() {
         let errors = serde_json::json!(&err);
         return Err(error::ErrorBadRequest(errors));
     }
 
     let conn: &PgConnection = &pool.get().unwrap();
-    let user = crate::logged_user(&id).map_err(error::ErrorUnauthorized)?;
-
     let mut errors = ValidationErrors::new();
     // メールアドレスチェック
     if !check_update_email(&user.id, &update_data.email, conn) {
@@ -113,12 +114,13 @@ pub async fn update(
 }
 
 // ユーザ登録
-fn create_user(signup_data: SignupData, conn: &PgConnection) -> Result<UserInfo, Error> {
+fn create_user(signup_data: SignupData, conn: &PgConnection) -> Result<UserInfo, error::Error> {
+    let password = util::hash_password(&signup_data.password).expect("password hash error");
     let new_user = NewUser {
         name: signup_data.name.clone(),
         // emailは小文字で登録
-        email: signup_data.email.clone().to_ascii_lowercase(),
-        password: util::hash_password(&signup_data.password.clone()).expect("password hash error"),
+        email: signup_data.email.to_ascii_lowercase().clone(),
+        password: password.clone(),
     };
     // DBに登録
     let user = diesel::insert_into(schema::users::table)
@@ -133,11 +135,14 @@ fn update_user(
     user_id: &i32,
     update_data: &UpdateData,
     conn: &PgConnection,
-) -> Result<UserInfo, Error> {
+) -> Result<UserInfo, error::Error> {
     use crate::schema::users::dsl::*;
 
     let updated_row = diesel::update(users.find(user_id))
-        .set((name.eq(&update_data.name), email.eq(&update_data.email)))
+        .set((
+            name.eq(&update_data.name),
+            email.eq(&update_data.email.to_ascii_lowercase()),
+        ))
         .get_result::<User>(conn)
         .expect("Update user error");
 

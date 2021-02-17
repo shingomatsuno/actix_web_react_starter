@@ -23,7 +23,8 @@ import Alert from "./components/molecules/alert";
 import { closeAlert } from "./store/modules/alertModule";
 import Snackbar from "./components/molecules/snackbar";
 import { closeSnack } from "./store/modules/snackbarModule";
-
+import Posts from "./pages/posts";
+import Post from "./pages/post";
 // 認証が必要なroute
 const ProtectedRoute = ({ component, ...props }: any) => {
   const { user } = useSelector((state: RootState) => state.user);
@@ -122,6 +123,7 @@ export default function App() {
       dispatch(closeAlert());
       // スナックバーが開いていたら閉じる
       dispatch(closeSnack());
+      dispatch(setLoading(false));
     };
   });
 
@@ -138,6 +140,8 @@ export default function App() {
             <Route exact path="/" component={Top} />
             <UnauthRoute path="/login" component={Login} />
             <UnauthRoute exact path="/signup" component={Signup} />
+            <ProtectedRoute exact path="/posts" component={Posts} />
+            <ProtectedRoute exact path="/post" component={Post} />
             <ProtectedRoute path="/articles" component={Articles} />
             <ProtectedRoute path="/home" component={Home} />
           </React.Fragment>

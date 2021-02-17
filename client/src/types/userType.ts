@@ -14,15 +14,15 @@ export type RegistParam = {
   password_confirmation: string;
 };
 
-// ユーザ編集
+// ユーザ更新
 export type UpdateParam = {
   name: string;
-  email: String;
+  email: string;
 };
 
 // ユーザ-情報
 export type User = {
   id: number;
   name: string;
-  email: String;
+  email: string;
 };

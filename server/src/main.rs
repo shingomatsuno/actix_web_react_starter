@@ -17,6 +17,7 @@ use time::Duration;
 // プロジェクトで使うモジュールを宣言
 mod api;
 mod model;
+mod pagination;
 mod schema;
 mod util;
 
@@ -77,13 +78,20 @@ async fn main() -> std::io::Result<()> {
                     .service(
                         web::resource("/users")
                             .route(web::post().to(api::users::regist))
-                            .route(web::put().to(api::users::update)),
+                            .route(web::patch().to(api::users::update)),
                     )
                     .service(
                         web::resource("/auth")
                             .route(web::get().to(api::auth::logged_user))
                             .route(web::post().to(api::auth::login))
                             .route(web::delete().to(api::auth::logout)),
+                    )
+                    .service(web::resource("/posts/{id}").route(web::get().to(api::posts::get_one)))
+                    .service(
+                        web::resource("/posts")
+                            .route(web::get().to(api::posts::get))
+                            .route(web::post().to(api::posts::create))
+                            .route(web::patch().to(api::posts::update)),
                     )
                     .route("/", web::get().to(|| HttpResponse::Ok().body("api"))),
             )
