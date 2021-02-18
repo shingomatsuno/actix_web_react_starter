@@ -91,7 +91,7 @@ export default function Posts() {
             })}
           </tbody>
         </table>
-        {total >= 1 && (
+        {total > 1 && (
           <Pagination
             count={total}
             showFirstButton
